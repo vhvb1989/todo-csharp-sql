@@ -8,7 +8,7 @@ param applicationInsightsName string = ''
 param appServicePlanId string
 @secure()
 param appSettings object = {}
-param keyVaultName string
+//param keyVaultName string
 param serviceName string = 'api'
 
 module api '../core/host/appservice.bicep' = {
@@ -22,7 +22,7 @@ module api '../core/host/appservice.bicep' = {
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     appSettings: appSettings
-    keyVaultName: keyVaultName
+    //keyVaultName: keyVaultName
     runtimeName: 'dotnetcore'
     runtimeVersion: '8.0'
     scmDoBuildDuringDeployment: false

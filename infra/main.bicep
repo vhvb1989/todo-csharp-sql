@@ -34,14 +34,6 @@ param apimSku string = 'Consumption'
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
-@secure()
-@description('SQL Server administrator password')
-param sqlAdminPassword string
-
-@secure()
-@description('Application user password')
-param appUserPassword string
-
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -76,7 +68,7 @@ module api './app/api.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     appServicePlanId: appServicePlan.outputs.id
-    keyVaultName: keyVault.outputs.name
+    // keyVaultName: keyVault.outputs.name
     allowedOrigins: [ web.outputs.SERVICE_WEB_URI ]
     appSettings: {
       AZURE_SQL_CONNECTION_STRING_KEY: sqlServer.outputs.connectionStringKey
@@ -85,14 +77,14 @@ module api './app/api.bicep' = {
 }
 
 // Give the API access to KeyVault
-module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'api-keyvault-access'
-  scope: rg
-  params: {
-    keyVaultName: keyVault.outputs.name
-    principalId: api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
-  }
-}
+// module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
+//   name: 'api-keyvault-access'
+//   scope: rg
+//   params: {
+//     keyVaultName: keyVault.outputs.name
+//     principalId: api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
+//   }
+// }
 
 // The application database
 module sqlServer './app/db.bicep' = {
@@ -103,9 +95,7 @@ module sqlServer './app/db.bicep' = {
     databaseName: sqlDatabaseName
     location: location
     tags: tags
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
-    keyVaultName: keyVault.outputs.name
+    principalId: principalId
   }
 }
 
@@ -124,16 +114,16 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
 }
 
 // Store secrets in a keyvault
-module keyVault './core/security/keyvault.bicep' = {
-  name: 'keyvault'
-  scope: rg
-  params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-    location: location
-    tags: tags
-    principalId: principalId
-  }
-}
+// module keyVault './core/security/keyvault.bicep' = {
+//   name: 'keyvault'
+//   scope: rg
+//   params: {
+//     name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
+//     location: location
+//     tags: tags
+//     principalId: principalId
+//   }
+// }
 
 // Monitor application with Azure Monitor
 module monitoring './core/monitor/monitoring.bicep' = {
@@ -182,8 +172,8 @@ output AZURE_SQL_CONNECTION_STRING_KEY string = sqlServer.outputs.connectionStri
 
 // App outputs
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+// output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
+// output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output API_BASE_URL string = useAPIM ? apimApi.outputs.SERVICE_API_URI : api.outputs.SERVICE_API_URI

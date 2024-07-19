@@ -3,16 +3,12 @@ param location string = resourceGroup().location
 param tags object = {}
 
 param databaseName string = ''
-param keyVaultName string
-
-@secure()
-param sqlAdminPassword string
-@secure()
-param appUserPassword string
 
 // Because databaseName is optional in main.bicep, we make sure the database name is set here.
 var defaultDatabaseName = 'Todo'
 var actualDatabaseName = !empty(databaseName) ? databaseName : defaultDatabaseName
+
+param principalId string
 
 module sqlServer '../core/database/sqlserver/sqlserver.bicep' = {
   name: 'sqlserver'
@@ -21,9 +17,7 @@ module sqlServer '../core/database/sqlserver/sqlserver.bicep' = {
     location: location
     tags: tags
     databaseName: actualDatabaseName
-    keyVaultName: keyVaultName
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
+    principalId: principalId
   }
 }
 
