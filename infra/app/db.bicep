@@ -22,7 +22,7 @@ param principalId string
 ])
 param principalType string
 
-module sqlServer '../core/database/sqlserver/sqlserver-entraid.bicep' = {
+module sqlServer '../core/database/sqlserver/sqlserver-entraId.bicep' = {
   name: 'sqlserver'
   params: {
     name: name
@@ -36,4 +36,5 @@ module sqlServer '../core/database/sqlserver/sqlserver-entraid.bicep' = {
 }
 
 output connectionString string = sqlServer.outputs.connectionString
+output serverFqdn string = sqlServer.outputs.serverFqdn
 output databaseName string = sqlServer.outputs.databaseName

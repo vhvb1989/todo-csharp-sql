@@ -78,7 +78,6 @@ module api './app/api.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     appServicePlanId: appServicePlan.outputs.id
-    // keyVaultName: keyVault.outputs.name
     allowedOrigins: [ web.outputs.SERVICE_WEB_URI ]
     appSettings: {
       AZURE_SQL_CONNECTION_STRING: sqlServer.outputs.connectionString
@@ -159,6 +158,10 @@ module apimApi './app/apim-api.bicep' = if (useAPIM) {
 
 // Data outputs
 output AZURE_SQL_CONNECTION_STRING string = sqlServer.outputs.connectionString
+output AZURE_SQL_SERVER_FQDN string = sqlServer.outputs.serverFqdn
+output AZURE_SQL_SERVER_DB string = sqlServer.outputs.databaseName
+output SQL_USER_LOGIN string = api.outputs.SERVICE_API_NAME
+output SQL_USER_LOGIN_ID string = api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
 
 // App outputs
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString

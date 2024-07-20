@@ -1,0 +1,18 @@
+operations:
+  - type: SqlScript
+    description: Set up log in with Azure Active Directory
+    config:
+      server: ${AZURE_SQL_SERVER_FQDN}
+      database: master
+      path: ./initDb.sql
+      env:
+        SQL_USER_LOGIN: ${SQL_USER_LOGIN}
+        SQL_USER_LOGIN_ID: ${SQL_USER_LOGIN_ID}
+  - type: SqlScript
+    description: Create user for login
+    config:
+      server: ${AZURE_SQL_SERVER_FQDN}
+      database: ${AZURE_SQL_SERVER_DB}
+      path: ./AddUser.sql
+      env:
+        SQL_USER_LOGIN: ${SQL_USER_LOGIN}

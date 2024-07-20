@@ -58,3 +58,4 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
 
 output connectionString string = 'Server=${sqlServer.properties.fullyQualifiedDomainName};Initial Catalog=${sqlServer::database.name};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default'
 output databaseName string = sqlServer::database.name
+output serverFqdn string = sqlServer.properties.fullyQualifiedDomainName
