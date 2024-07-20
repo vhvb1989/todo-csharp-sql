@@ -17,7 +17,6 @@ param apiServiceName string = ''
 param applicationInsightsDashboardName string = ''
 param applicationInsightsName string = ''
 param appServicePlanName string = ''
-param keyVaultName string = ''
 param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param sqlServerName string = ''
@@ -31,8 +30,19 @@ param useAPIM bool = false
 @description('API Management SKU to use if APIM is enabled')
 param apimSku string = 'Consumption'
 
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
+@description('Login of the principal to assign the role to. Use email for User or Application Name for Application')
+param sqlServerPrincipalLogin string
+
+@description('Object Id of the EntraId user for login')
+param sqlServerAdminId string
+
+@description('Type of the principal to assign the role to')
+@allowed([
+  'User'
+  'Application'
+  'Group'
+])
+param sqlServerPrincipalType string
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -71,20 +81,10 @@ module api './app/api.bicep' = {
     // keyVaultName: keyVault.outputs.name
     allowedOrigins: [ web.outputs.SERVICE_WEB_URI ]
     appSettings: {
-      AZURE_SQL_CONNECTION_STRING_KEY: sqlServer.outputs.connectionStringKey
+      AZURE_SQL_CONNECTION_STRING: sqlServer.outputs.connectionString
     }
   }
 }
-
-// Give the API access to KeyVault
-// module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-//   name: 'api-keyvault-access'
-//   scope: rg
-//   params: {
-//     keyVaultName: keyVault.outputs.name
-//     principalId: api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
-//   }
-// }
 
 // The application database
 module sqlServer './app/db.bicep' = {
@@ -95,7 +95,9 @@ module sqlServer './app/db.bicep' = {
     databaseName: sqlDatabaseName
     location: location
     tags: tags
-    principalId: principalId
+    principalId: sqlServerAdminId
+    principalLogin: sqlServerPrincipalLogin
+    principalType: sqlServerPrincipalType
   }
 }
 
@@ -112,18 +114,6 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     }
   }
 }
-
-// Store secrets in a keyvault
-// module keyVault './core/security/keyvault.bicep' = {
-//   name: 'keyvault'
-//   scope: rg
-//   params: {
-//     name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-//     location: location
-//     tags: tags
-//     principalId: principalId
-//   }
-// }
 
 // Monitor application with Azure Monitor
 module monitoring './core/monitor/monitoring.bicep' = {
@@ -168,12 +158,10 @@ module apimApi './app/apim-api.bicep' = if (useAPIM) {
 }
 
 // Data outputs
-output AZURE_SQL_CONNECTION_STRING_KEY string = sqlServer.outputs.connectionStringKey
+output AZURE_SQL_CONNECTION_STRING string = sqlServer.outputs.connectionString
 
 // App outputs
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-// output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
-// output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output API_BASE_URL string = useAPIM ? apimApi.outputs.SERVICE_API_URI : api.outputs.SERVICE_API_URI

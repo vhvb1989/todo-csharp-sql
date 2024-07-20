@@ -22,10 +22,11 @@ module api '../core/host/appservice.bicep' = {
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     appSettings: appSettings
-    //keyVaultName: keyVaultName
     runtimeName: 'dotnetcore'
     runtimeVersion: '8.0'
     scmDoBuildDuringDeployment: false
+    // turn on identity for the app service so it can allow AzureSQL passwordless connection
+    managedIdentity: true
   }
 }
 

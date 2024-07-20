@@ -8,9 +8,21 @@ param databaseName string = ''
 var defaultDatabaseName = 'Todo'
 var actualDatabaseName = !empty(databaseName) ? databaseName : defaultDatabaseName
 
+@description('Login of the principal to assign the role to. Use email for User or Application Name for Application')
+param principalLogin string
+
+@description('Object Id of the EntraId user for login')
 param principalId string
 
-module sqlServer '../core/database/sqlserver/sqlserver.bicep' = {
+@description('Type of the principal to assign the role to')
+@allowed([
+  'User'
+  'Application'
+  'Group'
+])
+param principalType string
+
+module sqlServer '../core/database/sqlserver/sqlserver-entraid.bicep' = {
   name: 'sqlserver'
   params: {
     name: name
@@ -18,8 +30,10 @@ module sqlServer '../core/database/sqlserver/sqlserver.bicep' = {
     tags: tags
     databaseName: actualDatabaseName
     principalId: principalId
+    principalLogin: principalLogin
+    principalType: principalType
   }
 }
 
-output connectionStringKey string = sqlServer.outputs.connectionStringKey
+output connectionString string = sqlServer.outputs.connectionString
 output databaseName string = sqlServer.outputs.databaseName
