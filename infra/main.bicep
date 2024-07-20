@@ -31,9 +31,19 @@ param useAPIM bool = false
 param apimSku string = 'Consumption'
 
 @description('Login of the principal to assign the role to. Use email for User or Application Name for Application')
+@metadata({
+  azd: {
+    type: 'principalLogin'
+  }
+})
 param sqlServerPrincipalLogin string
 
 @description('Object Id of the EntraId user for login')
+@metadata({
+  azd: {
+    type: 'principalId'
+  }
+})
 param sqlServerAdminId string
 
 @description('Type of the principal to assign the role to')
@@ -42,6 +52,11 @@ param sqlServerAdminId string
   'Application'
   'Group'
 ])
+@metadata({
+  azd: {
+    type: 'principalType'
+  }
+})
 param sqlServerPrincipalType string
 
 var abbrs = loadJsonContent('./abbreviations.json')
