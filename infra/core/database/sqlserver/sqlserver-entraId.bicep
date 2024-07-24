@@ -20,11 +20,13 @@ param principalId string
 ])
 param principalType string
 
-
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: name
   location: location
   tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     version: '12.0'
     minimalTlsVersion: '1.2'
@@ -50,8 +52,8 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
       // Allow all clients
       // Note: range [0.0.0.0-0.0.0.0] means "allow all Azure-hosted clients only".
       // This is not sufficient, because we also want to allow direct access from developer machine, for debugging purposes.
-      startIpAddress: '0.0.0.1'
-      endIpAddress: '255.255.255.254'
+      startIpAddress: '0.0.0.0'
+      endIpAddress: '0.0.0.0'
     }
   }
 }

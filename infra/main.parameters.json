@@ -13,6 +13,9 @@
     },
     "apimSku": {
       "value": "${APIM_SKU=Consumption}"
+    },
+    "userAssignedIdentityName" : {
+      "value": "${USER_ASSIGNED_IDENTITY_NAME}"
     }
   }
 }
